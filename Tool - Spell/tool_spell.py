@@ -1,5 +1,5 @@
 # Tool spell 1 line on CASIO fx-580VN X [UPDATE - 21/11/2026 - 4:45 PM]
-# Developed by White and 
+# Developed by White (Update developer) & AxesMC (Original developer)
 import ast
 import re
 def read_file(path):
