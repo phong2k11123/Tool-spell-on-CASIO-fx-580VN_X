@@ -1,345 +1,355 @@
-import time
-import sys
+# Tool spell 1 line on CASIO fx-580VN X [UPDATE - 21/11/2026 - 4:45 PM]
+# Developed by White and 
+import ast
 import re
-import string
-import json
-
-def typewriter(text, delay=0.00):
-    for ch in text:
-        sys.stdout.write(ch)
-        sys.stdout.flush()
-        time.sleep(delay)
-    print()
-
-def show_menu():
-    typewriter("\n===== HACK CASIO =====", 0.01)
-    time.sleep(0.5)
-    typewriter("Tool Spell on CASIO fx-580VN X", 0.01)
-    typewriter("- © 2026 HACK CASIO -", 0.01)
-    typewriter("1. Note", 0.02)
-    typewriter("2. Contact", 0.02)
-    typewriter("3. Spell", 0.02)
-
-def show_notes():
-    typewriter("\n===== Note =====", 0.02)
-    notes = [
-    "1. Tool hoàn toàn miễn phí, nghiêm cấm buôn bán hoặc sử dụng để trục lợi.",
-    "2. Không được chỉnh sửa hoặc xóa tên tác giả.",
-    "3. Nghiêm cấm sao chép hoặc phát tán trái phép dưới mọi hình thức.",
-    "4. Tool chỉ hỗ trợ spell tối đa 17 byte và ký tự.",
-    "5. Chỉ hỗ trợ CASIO fx-580VN X, các dòng máy khác có thể không hoạt động.",
-    "6. Không nên phụ thuộc hoàn toàn vào tool.",
-    "7. Tool có thể phát sinh lỗi trong quá trình sử dụng.",
-    "8. Nếu gặp lỗi, vui lòng liên hệ để được hỗ trợ."
-    ]
-    for note in notes:
-        typewriter(f"  • {note}", 0.00)
-
-def show_contacts():
-    typewriter("\n===== Contact =====", 0.02)
-    contacts = [
-        "Discord: Phong2k11®(phong2k11_4).",
-        "Discord: C++ My Life(@kiet130218_80627) or Kiet1302181(@kiet1302181)."
-    ]
-    for info in contacts:
-        typewriter(f"  • {info}", 0.02)
-
-# Cái def fill_template() này dùng để lấp hex vào biến A B C
-def fill(hex_list):
-    A = ["1.0000", "__", "__", "_!", "!_", "__", "×10", "!!"]
-    B = ["1.", "__", "__", "__", "_!", "!_", "__", "×10", "!!"]
-    C = ["1.", "__", "__", "__", "_!", "!_", "__", "×10", "!!"]
-    pos = 0 # vị trí của hex_list
-    pos1 = 0 # vị trí slot của các biến A B C
-    filled = []
-    id = 0
-    hex_list_edited = []
-    pos3 = 0
-    filled.append(" x:\n")
-    # Xóa khoảng cách giữa 2 bytes
-    for phantu in hex_list:
-        if len(phantu) == 5:
-            xoa = phantu.replace(" ", "")
-            hex_list[pos3] = xoa
-        pos3 += 1
-    # Tách 2 bytes
-    for phantu in hex_list:
-        pos2 = 0
-        while pos2 <= len(phantu):
-            byte_edited = phantu[pos2:pos2+2]
-            if byte_edited == '':
-                break
-            else:
-                hex_list_edited.append(byte_edited)
-            pos2 += 2
-    hex_list = hex_list_edited
-    if len(hex_list) > 20:
-        return filled, 0, False
-
-    '''
-    ID = 0 thì chỉ biến A
-    ID = 1 thì chỉ biến B
-    ID = 2 thì chỉ biến C
-    '''
-    for i in range(100):
-        if id == 0:
-            slot = A[pos1]
-        elif id == 1:
-            slot = B[pos1]
-        elif id == 2:
-            slot = C[pos1]
-            
-        if slot in ["1.0000", "1."]:
-            if id == 0:
-                filled.append("A = ")
-            if id == 1:
-                filled.append("B = ")
-            if id == 2:
-                filled.append("C = ")
-            filled.append(slot)
-            pos1 += 1
-        if slot == "×10":
-            filled.append(slot)
-            pos1 += 1
+def read_file(path):
+    with open(path, encoding="utf-8") as f:
+        return ast.literal_eval("{" + f.read() + "}")
+def has_letter(h):
+    return h is not None and any(c in "ABCDEF" for c in h)
+def starts_with_letter(h):
+    return h is not None and h[0] in "ABCDEF"
+def hex_to_int(h):
+    return int(h, 16)
+def pair_violates(a, b):
+    return hex_to_int(a) * 256 + hex_to_int(b) >= 0x9991
+def filter_hex_bytes(bytes_in):
+    out = []
+    i = 0
+    n = len(bytes_in)
+    while i < n:
+        b = bytes_in[i]
+        if b.startswith("F") and i + 1 < n:
+            out.append(b)
+            out.append(bytes_in[i + 1])
+            i += 2
         else:
-            byte = hex_list[pos]
-            if slot == "__":
-                filled.append(byte)
-                pos += 1
-                pos1 += 1
-            elif slot == "_!":
-                if byte[1].isalpha():
-                    filled.append("20")
-                else:
-                    filled.append(byte)
-                    pos += 1
-                pos1 += 1
-            elif slot == "!_":
-                if byte[0].isalpha():
-                    filled.append("20")
-                else:
-                    filled.append(byte)
-                    pos += 1
-                pos1 += 1
-            elif slot == "!!":
-                if byte.isdigit():
-                    filled.append(byte)
-                    filled.append("\n")
-                    pos += 1
-                elif byte[0].isalpha() or byte[1].isalpha():
-                    if hex_list[pos-1] == "F4":
-                        filled.remove(hex_list[pos-1])
-                        filled.insert(pos-1, "20")
-                        pos -= 1
-                        filled.append("20")
-                    else:
-                        filled.append("20")
-                    filled.append("\n")
-                pos1 = 0
-                id += 1
-        if len(hex_list) == pos:
+            out.append(b)
+            i += 1
+    return out
+def fill_section(queue, n_us, n_sl, n_st):
+    us = [(None, False)] * n_us
+    sl = [(None, False)] * n_sl
+    st = [(None, False)] * n_st
+    for i in range(n_us):
+        if queue:
+            us[i] = queue.pop(0)
+        else:
             break
-    if len(filled) - 6 > 20:
-        return filled, id, False
-    else:
-        return filled, id, True
-
-def spell_input():
-    cau = input("Nhập câu spell:")
-    while len(cau) > 17:
-        typewriter("Câu không hợp lệ.", 0.04)
-        cau = spell_input()
-    ds_chu = list(cau)
-    spaces = 17 - len(cau)
-    # Căn lề giữa cho câu:
-    if spaces % 2 == 0:
-        spaces_lr = spaces // 2
-        ds_chu = [' ' for i in range(spaces_lr)] + ds_chu + [' ' for i in range(spaces_lr)]
-    elif spaces % 2 == 1:
-        space_l = (spaces - 1) // 2
-        space_r = space_l + 1
-        ds_chu = [" " for i in range(space_l)] + ds_chu + [" " for i in range(space_r)]
-    # Lọc kí tự ghi bằng Hex và kí tự ghi bằng phím
-    count = 0
-    chars_hex = ['a','b','c','d','e','f','g','j','k','L','M','N','O','T','U','V','W','X','Y','Z']
-    hex_list = [] # Danh sách lưu các hex của các chữ không ghi bằng phím, lấy bằng hex
-    chars_by_hex = [] # Các kí tự lấy bằng hex trong câu nhập vào
-    chars_by_key = [] # Các kí tự lấy bằng key trong câu nhập vào
-    hex_chars = [] # Kí tự hex, là chữ cái A B C D E F in đậm
-    found_keys = {} # Phím
-    found_hex_chars = {}
-    all_ascii_chars = list(string.ascii_letters)
-    for ki_tu in ds_chu:  # Lọc
-        if ki_tu in chars_hex:  # Nếu kí tự nằm trong kí tự lấy bằng Hex
-            chars_by_hex.append(ki_tu)
-        elif ki_tu not in chars_hex and ki_tu in all_ascii_chars:  # Nếu kí tự không nằm trong chars_hex nhưng là ascii
-            chars_by_key.append(ki_tu)
-        elif ki_tu not in chars_hex and ki_tu not in all_ascii_chars and ki_tu != " " and not ki_tu.isdigit():
-            if ki_tu != "!":
-                chars_by_hex.append(ki_tu)
-        elif ki_tu == "!" and not ki_tu.isdigit():
-            chars_by_key.append(ki_tu)
-        elif ki_tu.isdigit():
-            chars_by_key.append(ki_tu)
-    # Lấy kí tự trong file
-    with open("chars_hex.json", "r") as file:
-        all_hex_chars = json.load(file) # Lấy dữ liệu
-        for char in chars_by_hex:
-            try:
-                hex_code = all_hex_chars[char]
-                typewriter(f"Hex của kí tự {char} là {hex_code}", 0.03)
-                hex_list.append(hex_code)
-            except Exception as e:
-                typewriter(f"a. Lỗi! Không thể tìm thấy kí tự {char}. Lỗi bắt được: {e}", 0.03)
-    with open("chars_key.json", "r") as f:
-        all_key_chars = json.load(f)
-        for char in chars_by_key:
-            try:
-                key = all_key_chars[char]
-                found_keys[char] = key
-            except Exception as e:
-                typewriter(f"b. Lỗi! Không thể tìm thấy phím của kí tự {char}. Lỗi bắt được: {e}", 0.03)
-    for byte in hex_list:
-        for ki_tu_hex in byte:
-            if ki_tu_hex in ["A", "B", "C", "D", "E", "F"]:
-                hex_chars.append(ki_tu_hex)
-    hex_chars.append("C")
-    hex_list.append("3C")
-    hex_list.append("23")
-    with open("takechars.txt", "r", encoding="utf-8") as f:
-        lines = f.readlines()
-        found = False
-        for line in lines:
-            line = line.strip()
-            parts = line.split(" : ")
-            for char in hex_chars:
-                if len(parts) == 2:
-                    if parts[0] == char:
-                        key = parts[1]
-                        found_hex_chars[char] = key
-                        found = True
-                        break
-    list_lo = []  # Danh sách
-    filled, id, status = fill(hex_list)
-    if not status:
-        typewriter("Lỗi quá nhiều byte.", 0.01)
-    for i in filled:
-        list_lo.append(i)
-    # Lấp hex_list vào A, B, C
-    typewriter("Bước 1: Reset máy: \n [shift] [9] [3] [=] [=]", 0.01)
-    typewriter("Bước 2: Vào LineI/O: \n [shift] [menu] [1] [3]", 0.01)
-    typewriter("Bước 3: Vào Basic Overflow: \n [x] [alpha] [CALC] [shift] [x] [x] [shift] [)] [9] [shift] [)] [9] [9] [9] [CALC] [=] [AC] [<] [del] [del] [CALC] [=] [<] [shift] [.]", 0.00)
-    typewriter("Bước 4: Lấy kí tự Hex cần thiết: ", 0.01)
-    for ki_tu_hex in hex_chars:
-        print(found_hex_chars.get(ki_tu_hex, ""), end=" ")
-        count += 1
-    typewriter(f"([<] [9] [DEL])×{count} [del] [del] [del] ([<])×{count} [alpha] [∫]")
-    typewriter("Bước 5: Gán hex: ", 0.01)
-    count = 0  # Reset biến count để đếm lần 
-    for i in list_lo[:]:
-        if i == "A = " or i == "B = " or i == "C = ":
-            list_lo.remove(i)
-    for byte in list_lo:
-        if byte == " n\\ 1.0000":
-            print(" n\\ [alpha] [(-)] [alpha] [CALC]", end=" ")
-        elif byte == "1.":
-            if count == 0:
-                print(" \n [alpha] [∫] [alpha] [□ ' \"]", end=" ")
-                count += 1
-            elif count == 1:
-                print(" \n [alpha] [∫] [alpha] [x⁻¹]", end=" ")
-        elif byte == ' n\\ x:':
-            print(" n\\ [x] [alpha] [∫]")
-        elif byte == " ":
-            pass
+    if n_sl >= 1 and queue:
+        if starts_with_letter(queue[0][0]):
+            sl[0] = ("30", True)
         else:
-            for ki_tu in byte:
-                if ki_tu.isdigit():
-                    print(f" [{ki_tu}]", end=" ")
-                elif ki_tu in ["A", "B", "C", "D", "E", "F"]:
-                    print("[>]", end=" ")
-                elif ki_tu == ".":
-                    print("[.]", end=" ")
-                elif byte == "×10":
-                    print("[×10]", end=" ")
-                    break
-    typewriter(f"[CALC] ([=])×{id + 2}", 0.02)
-    typewriter("Bước 6: Lấy 'an': \n [x] [alpha] [CALC] [shift] [x] [x] [shift] [)] [9] [shift] [)] [9] [CALC] [=] [<] [shift] [.] [shift] [.] [<] [<] [DEL] [v] [shift] [8] [v] [2] [6] [<] [<] [>] [9] [DEL] [<] [)] [+] [100 số bất kì] [CALC] [=]", 0.01)
-    typewriter("Bước 7: Lấy '@': \n [x] [alpha] [CALC] [shift] [x] [x] [shift] [)] [9] [shift] [)] [9] [CALC] [=] [<] [shift] [.]", 0.01)
-    if id == 0:
-        typewriter('[shift] [7] [4] [8]', 0.02)
-        typewriter('([<] [9] [DEL])×1\n[DEL]×10', 0.02)
-        typewriter('[<] [9 số bất kì] [>] [alpha] [∫] [>] [alpha] [CALC] [alpha] [(-)]\n[CALC] ([=])×2 [^]', 0.01)
-    elif id == 1:
-        typewriter('[shift] [7] [4] [8] [shift] [7] [4] [9]', 0.02)
-        typewriter('([<] [9] [DEL])×2\n[DEL]×10', 0.02)
-        typewriter('[<] [9 số bất kì] [>] [alpha] [∫] [>] [alpha] [CALC] [alpha] [(-)] [alpha] [∫] [>] [alpha] [CALC] [alpha] [□ \' "]\n[CALC] ([=])×3 [^]', 0.01)
-    elif id == 2:
-        typewriter('[shift] [7] [4] [8] [shift] [7] [4] [9] [shift] [7] [1] [4]', 0.02)
-        typewriter('([<] [9] [DEL])×3\n[DEL]×10', 0.01)
-        typewriter('[<] [9 số bất kì] [>] [alpha] [∫] [>] [alpha] [CALC] [alpha] [(-)] [alpha] [∫] [>] [alpha] [CALC] [alpha] [□ \' "] [alpha] [∫] [>] [alpha] [CALC] [alpha] [x^-1]\n[CALC] ([=])×4 [^]', 0.01)
-    typewriter('Bước 8: Xóa bytes thừa:', 0.02)
-    list_lo.reverse()
-    if " x:\n" in list_lo:
-        list_lo.remove(" x:\n")
-    if "\n" in list_lo:
-        list_lo.remove("\n")
-    count = 0
-    for i in list_lo:
-        if i == '20':
-            if count == 0:
-                print("[DEL]", end=" ")
+            sl[0] = queue.pop(0)
+    if n_sl >= 2 and queue:
+        next_byte = queue[0][0]
+        if sl[0][0] == "30":
+            sl[1] = queue.pop(0)
+        elif pair_violates(sl[0][0], next_byte):
+            sl[1] = ("30", True)
+        else:
+            sl[1] = queue.pop(0)
+    pushed = False
+    for i in range(n_st):
+        if not queue:
+            break
+        if has_letter(queue[0][0]):
+            st[i] = ("30", True)
+            pushed = True
+        else:
+            st[i] = queue.pop(0)
+    if pushed and n_sl >= 2 and sl[-1][0] is not None and sl[-1][0].startswith("F"):
+        prev = sl[-1]
+        sl[-1] = ("30", True)
+        queue.insert(0, prev)
+    return us, sl, st
+def format_section(name, us, sl, st, has_next):
+    us_hex = "".join(b for b, _ in us if b is not None)
+    sl_hex = "".join(b for b, _ in sl if b is not None)
+    st_hex = "".join(b for b, _ in st if b is not None)
+    if not us_hex and not sl_hex and not st_hex:
+        return None
+    prefix = "0000" if name == "A" else ""
+    line = f"{name}=1.{prefix}{us_hex}{sl_hex}"
+    if st_hex:
+        line += f"×10{st_hex}"
+    if has_next:
+        line += ":"
+    return line
+def build_units(A, B, C):
+    flat = []
+    def add_section(section, name):
+        us, sl, st = section
+        has_content = any(b is not None for g in [us, sl, st] for b, _ in g)
+        if not has_content:
+            return
+        if name in ("B", "C"):
+            flat.append(("dot1", None, False))
+        for group in [us, sl, st]:
+            for b, ins in group:
+                if b is not None:
+                    flat.append(("byte", b, ins))
+    add_section(A, "A")
+    add_section(B, "B")
+    add_section(C, "C")
+    units = []
+    i = 0
+    while i < len(flat):
+        kind, b, ins = flat[i]
+        if kind == "dot1":
+            units.append(("dot1", "1."))
+            i += 1
+            continue
+        if ins:
+            units.append(("ins30", b))
+            i += 1
+            continue
+        if b.startswith("F") and i + 1 < len(flat):
+            nk, nb, nins = flat[i + 1]
+            if nk == "byte" and not nins:
+                units.append(("fxxx", b + nb))
+                i += 2
+                continue
+        units.append(("byte", b))
+        i += 1
+    return units
+def compute_keys(units):
+    items = list(units)
+    p = len(items)
+    keys = []
+    while p > 0:
+        kind = items[p - 1][0]
+        if kind == "ins30":
+            keys.append("DEL")
+            items.pop(p - 1)
+            p -= 1
+        elif kind == "dot1":
+            keys.append("DEL")
+            keys.append("DEL")
+            items.pop(p - 1)
+            p -= 1
+        else:
+            keys.append("LEFT")
+            p -= 1
+    return keys
+def format_keys(keys):
+    if not keys:
+        return ""
+    parts = []
+    i = 0
+    while i < len(keys):
+        j = i
+        while j < len(keys) and keys[j] == keys[i]:
+            j += 1
+        n = j - i
+        sym = "◀" if keys[i] == "LEFT" else "DEL"
+        if n == 1:
+            parts.append(f"[{sym}]")
+        else:
+            parts.append(f"([{sym}])×{n}")
+        i = j
+    return " ".join(parts)
+def assign_hex(input_hex):
+    s = "".join(c for c in input_hex if c in "0123456789abcdefABCDEF")
+    if len(s) % 2 != 0:
+        return "Error: hex length must be even", ""
+    bytes_in = [s[i:i + 2].upper() for i in range(0, len(s), 2)] if s else []
+    filtered = filter_hex_bytes(bytes_in) if bytes_in else []
+    total = len(filtered) + 2
+    if total > 22:
+        return f"Error: exceeds 20 bytes", ""
+    queue = [(b, False) for b in filtered] + [("3C", False), ("23", False)]
+    A = fill_section(queue, 3, 2, 1)
+    B = fill_section(queue, 5, 2, 1)
+    C = fill_section(queue, 5, 2, 1)
+    if queue:
+        return f"Error: exceeds 20 bytes", ""
+    sections = [("A", A), ("B", B), ("C", C)]
+    has_content = []
+    for name, (us, sl, st) in sections:
+        uh = "".join(b for b, _ in us if b is not None)
+        sh = "".join(b for b, _ in sl if b is not None)
+        th = "".join(b for b, _ in st if b is not None)
+        has_content.append(bool(uh or sh or th))
+    lines = ["𝒙:"]
+    for idx, (name, section) in enumerate(sections):
+        has_next = any(has_content[idx + 1:])
+        line = format_section(name, *section, has_next)
+        if line:
+            lines.append(line)
+    units = build_units(A, B, C)
+    keys = compute_keys(units)
+    keys_str = format_keys(keys)
+    assign_text = "\n".join(lines)
+    return assign_text, keys_str
+def assign_to_key(assign_text):
+    if not assign_text or assign_text.startswith("Error"):
+        return "", ""
+    sections = []
+    for line in assign_text.split("\n"):
+        if "=" not in line:
+            continue
+        name, rhs = line.split("=", 1)
+        name = name.strip()
+        if name in ("A", "B", "C"):
+            sections.append((name, rhs.strip()))
+    if not sections:
+        return "", ""
+    prefix_map = {
+        "A": ["[ALPHA]", "[(-)]"],
+        "B": ["[ALPHA]", "[°' \"]"],
+        "C": ["[ALPHA]", "[𝒙⁻¹]"],
+    }
+    parts = []
+    for name, rhs in sections:
+        parts += prefix_map[name]
+        parts += ["[ALPHA]", "[CALC]"]
+        i = 0
+        while i < len(rhs):
+            ch = rhs[i]
+            if ch in "0123456789":
+                j = i
+                while j < len(rhs) and rhs[j] == ch:
+                    j += 1
+                n = j - i
+                if n == 1:
+                    parts.append(f"[{ch}]")
+                else:
+                    parts.append(f"([{ch}])×{n}")
+                i = j
+            elif ch in "ABCDEF":
+                parts.append("[▶]")
+                i += 1
+            elif ch == "×":
+                parts.append("[×10ˣ]")
+                if rhs[i+1:i+3] == "10":
+                    i += 3
+                else:
+                    i += 1
+            elif ch == ":":
+                parts += ["[ALPHA]", "[∫]"]
+                i += 1
+            elif ch == ".":
+                parts.append("[.]")
+                i += 1
             else:
-                print(f"[<]x{count} [DEL]", end=" ")
-            count = 0
-        elif i == '1.':
-            if count == 0:
-                print("[DEL]x2", end=" ")
-            else:
-                print(f"[<]x{count} [DEL]x2", end=" ")
-            count = 0
-        elif i == '1.0000':
-            if count != 0:
-                print(f"[<]x{count}", end=" ")
-            count = 0
-        elif i == '×10' or i == "F4":
-            pass
+                i += 1
+    n = len(sections)
+    abc = ""
+    if n == 1:
+        parts += ["[CALC]", "([=])×2"]
+        abc = "[SHIFT] [7] [4] [8] [◀] [9] ([DEL])×11 [◀] [1] [2] [3] [4] [5] [6] [▶] [ALPHA] [∫] [▶] [ALPHA] [CALC] [ALPHA] [(-)] [CALC] ([=])×2 [▲]"
+    elif n == 2:
+        parts += ["[CALC]", "([=])×3"]
+        abc = "[SHIFT] [7] [4] [8] [SHIFT] [7] [4] [9] ([◀] [9] [DEL])×2 ([DEL])×10 [◀] [1] [2] [3] [4] [5] [6] [▶] [ALPHA] [∫] [▶] [ALPHA] [CALC] [ALPHA] [(-)] [ALPHA] [∫] [▶] [ALPHA] [CALC] [ALPHA] [°' \"] [CALC] ([=])×3 ([▲])×2"
+    elif n == 3:
+        parts += ["[CALC]", "([=])×4"]
+        abc = "[SHIFT] [7] [4] [8] [SHIFT] [7] [4] [9] [SHIFT] [7] [1] [4] ([◀] [9] [DEL])×3 ([DEL])×10 [◀] [1] [2] [3] [4] [5] [6] [▶] [ALPHA] [∫] [▶] [ALPHA] [CALC] [ALPHA] [(-)] [ALPHA] [∫] [▶] [ALPHA] [CALC] [ALPHA] [°' \"] [ALPHA] [∫] [▶] [ALPHA] [CALC] [ALPHA] [𝒙⁻¹] [CALC] ([=])×4 ([▲])×3"
+    return " ".join(parts), abc
+def text_to_key_chars(text_spell, chars_key):
+    parts = []
+    for c in text_spell:
+        if c in chars_key:
+            parts.append(chars_key[c])
         else:
-            count += 1
-    typewriter("\nBước 9: Nhập chữ: ")
-    b = 0  # Biến đếm khi có kí tự 2 bytes
-    for char in ds_chu:
-        if char in found_keys:
-            typewriter(found_keys[char],0.04)
-        elif char not in found_keys:
-            # Tại sao dấu cách không có trong found_keys ? Do idk :)))
-            if char == " ":
-                typewriter("[shift] [8] [3] [4]", 0.02)
-                b+=1
-            elif char not in all_ascii_chars:
-                typewriter("[>]", 0.02)
-                time.sleep(0.8)
-                b+=1 #Do không nằm trong kí tự Tiếng Anh và các kí tự ascii
-            elif char in all_ascii_chars:
-                if char in chars_by_hex:
-                    typewriter("[>]",0.01)
-                    time.sleep(0.01)
-    typewriter(f"[{17-b} số bất kì] [shift] [(] [2] [x] [calc] [=]")
-    typewriter("--- End ---", 0.01)
-    typewriter("- Developed by Phong2k11® & AxesMC -", 0.01)
-
-def main():
-    show_menu()  # Hiện menu
-    while True:
-        choice = input(">>> ").strip()
-        if choice == "1":
-            show_notes()
-        elif choice == "2":
-            show_contacts()
-        elif choice == "3":
-            spell_input()
+            parts.append("[▶]")
+    merged = []
+    i = 0
+    while i < len(parts):
+        j = i
+        while j < len(parts) and parts[j] == parts[i]:
+            j += 1
+        n = j - i
+        if n == 1:
+            merged.append(parts[i])
         else:
-            typewriter("Lựa chọn không hợp lệ.", 0.01)
-
-if __name__ == "__main__":
-    main()
+            merged.append(f"({parts[i]})×{n}")
+        i = j
+    return " ".join(merged)
+def count_vietnamese_chars(text):
+    return len(re.findall(
+        r"[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễ"
+        r"ìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữ"
+        r"ỳýỵỷỹđÀÁẠẢÃÂẦẤẬẬẨẪĂẰẮẶẲẴ"
+        r"ÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖ"
+        r"ƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]",
+        text
+    ))
+def build_assign_count(count):
+    if count == 1:
+        return "[SHIFT] [7] [3] [9] ([◀] [9] [DEL])×2 ([DEL])×10"
+    if count == 0:
+        return "[SHIFT] [7] [3] [9] [◀] [9] ([DEL])×11"
+    return f"[SHIFT] [7] [3] [9] ([◀] [9] [DEL])×{count + 1} ([DEL])×10"
+def build_zero_key(num):
+    if num == 0:
+        return ""
+    if num == 1:
+        return "[0]"
+    return f"([0])×{num}"
+chars_hex = read_file("chars_hex.txt")
+hex_key = read_file("hex_key.txt")
+chars_key = read_file("chars_key.txt")
+while True:
+    text_spell = input("Enter text:")
+    if len(text_spell) > 17:
+        print("Error")
+        continue
+    invalid_chars = []
+    for c in text_spell:
+        if c == " ":
+            continue
+        if c not in chars_hex and c not in chars_key:
+            invalid_chars.append(c)
+    if invalid_chars:
+        print(f"Error: characters not found in chars_hex/chars_key: {' '.join(sorted(set(invalid_chars)))}")
+        print()
+        continue
+    char_pad = 17 - len(text_spell)
+    char_pad_1, char_pad_2 = divmod(char_pad, 2)
+    text_spell = (" " * char_pad_1) + text_spell + (" " * char_pad_1) + (" " * char_pad_2)
+    print(f"SPELL [{text_spell}] 1 LINE on CASIO fx-580VN X")
+    hex_list = []
+    for c in text_spell:
+        if c in chars_hex:
+            hex_list.append(chars_hex[c])
+    get_hex = " ".join(hex_list)
+    key_list = []
+    for byte_hex in hex_list:
+        for ch in byte_hex:
+            if ch in hex_key:
+                key_list.append(hex_key[ch])
+    count = len(key_list)
+    key_count = build_assign_count(count)
+    get_key = " ".join(key_list)
+    assign_text, delete_hex = assign_hex(get_hex)
+    if assign_text.startswith("Error"):
+        print(assign_text)
+        assign_text = ""
+        delete_hex = ""
+    key_assignhex, abc = assign_to_key(assign_text)
+    key_chars = text_to_key_chars(text_spell, chars_key)
+    spaces = text_spell.count(" ")
+    chars_vn = count_vietnamese_chars(text_spell)
+    num = (17 - (spaces + chars_vn)) + 14
+    key_0 = build_zero_key(num)
+    print("- Step 1: Reset")
+    print(" [SHIFT] [9] [3] ([=])×2")
+    print("- Step 2: Basic overflow")
+    print(" [SHIFT] [MENU SETUP] [1] [3] [𝒙] [ALPHA] [CALC] [SHIFT] ([𝒙])×2 [SHIFT] [)] [9] [SHIFT] [)] ([9])×3 [CALC] [=] [AC] [◀] ([DEL])×2 [CALC] [=] [◀] [SHIFT] [.]")
+    print("- Step 3: Assign hex")
+    parts = []
+    if get_key:
+        parts.append(get_key)
+    if key_count:
+        parts.append(key_count)
+    if key_assignhex:
+        parts.append(f"[ALPHA] [∫] {key_assignhex}")
+    print(" " + " ".join(parts))
+    print("- Step 4: 124an")
+    print(" [𝒙] [ALPHA] [CALC] [SHIFT] ([𝒙])×2 [SHIFT] [)] [9] [SHIFT] [)] [9] [CALC] [=] [◀] ([SHIFT] [.])×2 ([◀])×2 [DEL] [▼] [.] [◀] ([DEL])×8 [▶] [ALPHA] [CALC] [𝒙²] [+] [×10ˣ] [1] [=]")
+    print("- Step 5: Export hex")
+    print(f" [𝒙] [ALPHA] [CALC] [SHIFT] ([𝒙])×2 [SHIFT] [)] [9] [SHIFT] [)] [9] [CALC] [=] [◀] [SHIFT] [.] {abc} {delete_hex}")
+    print("- Step 6: Complete hex")
+    print(f" {key_chars} {key_0} [SHIFT] [(] [▶] [2] [𝒙] [CALC] [=]")
+    print()
